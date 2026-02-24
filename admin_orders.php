@@ -132,6 +132,7 @@ $statusColors = ['pending'=>'#f59e0b','confirmed'=>'#16a34a','shipped'=>'#2563eb
             <a href="admin_orders.php" class="nav-link active"><span class="nav-icon">📋</span><span>Orders</span></a>
             <a href="admin_users.php" class="nav-link"><span class="nav-icon">👥</span><span>Members</span></a>
             <a href="admin_coupons.php" class="nav-link"><span class="nav-icon">🎟️</span><span>Coupons</span></a>
+            <a href="admin_promotions.php" class="nav-link"><span class="nav-icon">📢</span><span>Promotions</span></a>
             <a href="admin_contacts.php" class="nav-link"><span class="nav-icon">📧</span><span>Messages</span></a>
             <div class="nav-section-title">หน้าร้าน</div>
             <a href="showcase.php" class="nav-link"><span class="nav-icon">🛍️</span><span>Showcase</span></a>

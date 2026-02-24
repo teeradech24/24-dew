@@ -484,6 +484,105 @@ if ($searchQuery || $filterCat) {
 </div>
 <?php endif; ?>
 
+<!-- Flash Sale Section -->
+<div id="flashSaleSection" style="display:none">
+<div class="flash-sale-container">
+    <div class="flash-header">
+        <div class="flash-title">
+            <span class="flash-icon">⚡</span>
+            <h2>FLASH SALE</h2>
+            <span class="flash-badge-live">LIVE</span>
+        </div>
+        <div class="flash-countdown" id="flashCountdown">
+            <div class="fcd-box"><span id="fsH">00</span><small>ชม.</small></div>
+            <div class="fcd-sep">:</div>
+            <div class="fcd-box"><span id="fsM">00</span><small>นาที</small></div>
+            <div class="fcd-sep">:</div>
+            <div class="fcd-box"><span id="fsS">00</span><small>วินาที</small></div>
+        </div>
+    </div>
+    <div class="flash-grid" id="flashGrid"></div>
+</div>
+</div>
+
+<style>
+.flash-sale-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
+.flash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+.flash-title { display: flex; align-items: center; gap: 0.5rem; }
+.flash-icon { font-size: 1.5rem; animation: flashPulse 1s ease infinite; }
+@keyframes flashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+.flash-title h2 { font-size: 1.3rem; font-weight: 900; color: var(--text-primary); letter-spacing: 0.03em; }
+.flash-badge-live { background: #dc2626; color: #fff; font-size: 0.6rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 100px; animation: livePulse 1.5s ease infinite; }
+@keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.flash-countdown { display: flex; align-items: center; gap: 0.25rem; }
+.fcd-box { background: #1a1a1a; color: #fff; text-align: center; padding: 0.3rem 0.5rem; border-radius: 6px; min-width: 42px; }
+[data-theme='dark'] .fcd-box { background: #333; }
+.fcd-box span { display: block; font-size: 1.1rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.fcd-box small { font-size: 0.55rem; color: rgba(255,255,255,0.6); }
+.fcd-sep { font-size: 1rem; font-weight: 800; color: var(--text-muted); }
+.flash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+.fs-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: var(--transition); position: relative; text-decoration: none; color: inherit; }
+.fs-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.fs-card .fs-badge { position: absolute; top: 8px; left: 8px; background: #dc2626; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 0.2rem 0.5rem; border-radius: 4px; z-index: 2; }
+.fs-card .fs-img { height: 150px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; border-bottom: 1px solid var(--border); }
+[data-theme='dark'] .fs-card .fs-img { background: #1a1a1a; }
+.fs-card .fs-img img { max-width: 90%; max-height: 130px; object-fit: contain; }
+.fs-card .fs-info { padding: 0.65rem 0.75rem; }
+.fs-card .fs-name { font-size: 0.78rem; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 0.3rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fs-card .fs-prices { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem; }
+.fs-card .fs-sale-price { font-size: 1rem; font-weight: 800; color: #dc2626; }
+.fs-card .fs-orig-price { font-size: 0.72rem; color: var(--text-muted); text-decoration: line-through; }
+.fs-card .fs-progress { height: 6px; background: var(--bg-tertiary); border-radius: 100px; overflow: hidden; }
+.fs-card .fs-progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 100px; transition: width 0.3s ease; }
+.fs-card .fs-sold { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.2rem; }
+</style>
+
+<script>
+(async function loadFlashSales() {
+    try {
+        const res = await fetch('promotions_api.php?action=get_flash_sales');
+        const data = await res.json();
+        if (!data.ok || !data.flash_sales || data.flash_sales.length === 0) return;
+
+        document.getElementById('flashSaleSection').style.display = '';
+        const grid = document.getElementById('flashGrid');
+        let nearestEnd = Infinity;
+
+        grid.innerHTML = data.flash_sales.map(s => {
+            if (s.remaining_seconds < nearestEnd) nearestEnd = s.remaining_seconds;
+            return `<a href="product_detail.php?id=${s.product_id}" class="fs-card">
+                <div class="fs-badge">-${s.discount_percent}%</div>
+                <div class="fs-img">${s.image_url ? `<img src="${s.image_url}" alt="">` : '<span style="font-size:2.5rem">📦</span>'}</div>
+                <div class="fs-info">
+                    <div class="fs-name">${s.product_name}</div>
+                    <div class="fs-prices">
+                        <span class="fs-sale-price">฿${Number(s.sale_price).toLocaleString('th-TH',{minimumFractionDigits:2})}</span>
+                        <span class="fs-orig-price">฿${Number(s.original_price).toLocaleString('th-TH',{minimumFractionDigits:2})}</span>
+                    </div>
+                    <div class="fs-progress"><div class="fs-progress-fill" style="width:${s.progress}%"></div></div>
+                    <div class="fs-sold">ขายแล้ว ${s.quantity_sold}/${s.quantity_limit || '∞'} ชิ้น</div>
+                </div>
+            </a>`;
+        }).join('');
+
+        // Countdown for nearest ending deal
+        let remain = nearestEnd;
+        function tickFS() {
+            if (remain <= 0) return;
+            remain--;
+            const h = Math.floor(remain / 3600);
+            const m = Math.floor((remain % 3600) / 60);
+            const sec = remain % 60;
+            document.getElementById('fsH').textContent = String(h).padStart(2, '0');
+            document.getElementById('fsM').textContent = String(m).padStart(2, '0');
+            document.getElementById('fsS').textContent = String(sec).padStart(2, '0');
+        }
+        tickFS();
+        setInterval(tickFS, 1000);
+    } catch(e) { console.log('Flash sale load error', e); }
+})();
+</script>
+
 <!-- Search Bar -->
 <div class="search-section">
     <form class="search-bar" method="GET" autocomplete="off">

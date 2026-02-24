@@ -131,6 +131,10 @@ try { $unreadNotifs = $pdo->query("SELECT COUNT(*) FROM notifications WHERE is_r
                 <span class="nav-icon">🎟️</span>
                 <span>Coupons</span>
             </a>
+            <a href="admin_promotions.php" class="nav-link">
+                <span class="nav-icon">📢</span>
+                <span>Promotions</span>
+            </a>
             <div class="nav-section-title">หน้าร้าน</div>
             <a href="showcase.php" class="nav-link">
                 <span class="nav-icon">🛍️</span>
