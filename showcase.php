@@ -79,27 +79,114 @@ if ($searchQuery || $filterCat) {
         .top-nav-links a { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; padding: 0.4rem 0.85rem; border-radius: var(--radius-sm); transition: var(--transition); }
         .top-nav-links a:hover { color: var(--text-primary); background: var(--bg-tertiary); }
 
-        /* ---- Banner Slideshow ---- */
-        .banner-slider { position: relative; overflow: hidden; background: #1a1a1a; }
-        .banner-track { display: flex; transition: transform 0.6s ease; }
-        .banner-slide { min-width: 100%; padding: 2.5rem 4rem; display: flex; align-items: center; justify-content: center; gap: 3rem; }
-        .banner-text { flex: 1; }
-        .banner-slide h2 { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem; line-height: 1.2; }
-        .banner-slide p { color: rgba(255,255,255,0.7); font-size: 0.95rem; max-width: 400px; }
-        .banner-slide .banner-tag { display: inline-block; background: rgba(255,255,255,0.15); color: #fff; padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; }
-        .banner-slide .banner-price { font-size: 1.5rem; font-weight: 800; color: #4ade80; margin-top: 0.5rem; }
-        .banner-img { flex: 0 0 220px; height: 180px; display: flex; align-items: center; justify-content: center; }
-        .banner-img img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5)); }
-        .slide-1 { background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); }
-        .slide-2 { background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); }
-        .slide-3 { background: linear-gradient(135deg, #1a1a1a 0%, #4a1a2e 100%); }
-        .banner-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; }
-        .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: var(--transition); }
-        .banner-dot.active { background: #fff; width: 24px; border-radius: 4px; }
-        .banner-arrows { position: absolute; top: 50%; width: 100%; display: flex; justify-content: space-between; padding: 0 1rem; transform: translateY(-50%); pointer-events: none; }
-        .banner-arrow { width: 36px; height: 36px; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: #fff; font-size: 1.1rem; cursor: pointer; pointer-events: all; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
-        .banner-arrow:hover { background: rgba(255,255,255,0.3); }
-        @media (max-width: 768px) { .banner-slide { flex-direction: column; padding: 2rem 1.5rem; gap: 1rem; text-align: center; } .banner-img { flex: 0 0 120px; height: 120px; } .banner-slide h2 { font-size: 1.3rem; } }
+        /* ---- Banner Slideshow (Premium) ---- */
+        .banner-slider { position: relative; overflow: hidden; background: #0a0a0f; height: 420px; }
+        .banner-particles { position: absolute; inset: 0; z-index: 1; }
+        .banner-track { display: flex; transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1); position: relative; z-index: 2; height: 100%; }
+        .banner-slide { min-width: 100%; padding: 3rem 5rem; display: flex; align-items: center; justify-content: center; gap: 4rem; position: relative; }
+
+        /* Slide backgrounds with animated gradient */
+        .slide-1 { background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 40%, #0a1a2e 100%); }
+        .slide-2 { background: linear-gradient(135deg, #0a1020 0%, #0a2040 40%, #102040 100%); }
+        .slide-3 { background: linear-gradient(135deg, #1a0a10 0%, #2a0a1a 40%, #1a1020 100%); }
+        .slide-4 { background: linear-gradient(135deg, #0a1a0a 0%, #0a2a1a 40%, #102010 100%); }
+
+        /* Glow orbs per slide */
+        .banner-slide::before { content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%; filter: blur(120px); opacity: 0.3; animation: pulseGlow 4s ease-in-out infinite alternate; }
+        .slide-1::before { background: radial-gradient(circle, #7c3aed, transparent); top: -40%; right: 10%; }
+        .slide-2::before { background: radial-gradient(circle, #3b82f6, transparent); top: -30%; left: 5%; }
+        .slide-3::before { background: radial-gradient(circle, #ef4444, transparent); bottom: -40%; right: 20%; }
+        .slide-4::before { background: radial-gradient(circle, #10b981, transparent); top: -30%; right: 15%; }
+        @keyframes pulseGlow { 0% { transform: scale(1); opacity: 0.2; } 100% { transform: scale(1.3); opacity: 0.4; } }
+
+        .banner-text { flex: 1; position: relative; z-index: 3; max-width: 520px; }
+        .banner-slide h2 { font-size: 2.4rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1.15; letter-spacing: -0.02em; }
+        .banner-slide h2 .text-gradient { background: linear-gradient(90deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .slide-2 h2 .text-gradient { background: linear-gradient(90deg, #60a5fa, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .slide-3 h2 .text-gradient { background: linear-gradient(90deg, #f87171, #fb923c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .slide-4 h2 .text-gradient { background: linear-gradient(90deg, #34d399, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .banner-slide p { color: rgba(255,255,255,0.65); font-size: 0.95rem; line-height: 1.6; max-width: 420px; margin-bottom: 1.2rem; }
+
+        /* Tags */
+        .banner-tag { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; backdrop-filter: blur(8px); }
+        .tag-fire { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+        .tag-gem { background: rgba(124,58,237,0.2); color: #c4b5fd; border: 1px solid rgba(124,58,237,0.3); }
+        .tag-bolt { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+        .tag-new { background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+
+        /* Price area */
+        .banner-price-row { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.2rem; }
+        .banner-price { font-size: 2rem; font-weight: 900; color: #fff; }
+        .banner-price-old { font-size: 1rem; color: rgba(255,255,255,0.35); text-decoration: line-through; }
+        .banner-discount { display: inline-block; background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.72rem; font-weight: 800; }
+
+        /* CTA Buttons */
+        .banner-cta { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+        .btn-cta-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.6rem; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border: none; border-radius: 10px; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; text-decoration: none; box-shadow: 0 4px 20px rgba(124,58,237,0.4); }
+        .btn-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.5); }
+        .slide-2 .btn-cta-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 20px rgba(37,99,235,0.4); }
+        .slide-2 .btn-cta-primary:hover { box-shadow: 0 8px 30px rgba(37,99,235,0.5); }
+        .slide-3 .btn-cta-primary { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 4px 20px rgba(220,38,38,0.4); }
+        .slide-3 .btn-cta-primary:hover { box-shadow: 0 8px 30px rgba(220,38,38,0.5); }
+        .slide-4 .btn-cta-primary { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 4px 20px rgba(5,150,105,0.4); }
+        .slide-4 .btn-cta-primary:hover { box-shadow: 0 8px 30px rgba(5,150,105,0.5); }
+        .btn-cta-secondary { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.7rem 1.4rem; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; backdrop-filter: blur(8px); transition: all 0.3s ease; text-decoration: none; }
+        .btn-cta-secondary:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-1px); }
+
+        /* Feature badges row */
+        .banner-features { display: flex; gap: 1.25rem; margin-top: 1rem; }
+        .banner-feat { display: flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; color: rgba(255,255,255,0.55); font-weight: 500; }
+        .banner-feat span { font-size: 0.85rem; }
+
+        /* Image area */
+        .banner-img { flex: 0 0 300px; height: 300px; position: relative; display: flex; align-items: center; justify-content: center; z-index: 3; }
+        .banner-img img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6)); animation: floatProduct 6s ease-in-out infinite; }
+        @keyframes floatProduct { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(1deg); } }
+
+        /* Glass card behind image */
+        .banner-img::before { content: ''; position: absolute; width: 260px; height: 260px; border-radius: 30px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(20px); transform: rotate(12deg); z-index: -1; }
+        .banner-img::after { content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(124,58,237,0.15), transparent 70%); z-index: -1; animation: pulseGlow 3s ease-in-out infinite alternate; }
+        .slide-2 .banner-img::after { background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%); }
+        .slide-3 .banner-img::after { background: radial-gradient(circle, rgba(239,68,68,0.15), transparent 70%); }
+        .slide-4 .banner-img::after { background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%); }
+
+        /* Countdown Timer */
+        .banner-countdown { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .cd-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.4rem 0.65rem; text-align: center; backdrop-filter: blur(10px); min-width: 48px; }
+        .cd-box .cd-num { font-size: 1.1rem; font-weight: 800; color: #fff; display: block; line-height: 1.2; }
+        .cd-box .cd-label { font-size: 0.55rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+
+        /* Dots & Arrows */
+        .banner-dots { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 10; }
+        .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.4s ease; border: none; }
+        .banner-dot.active { background: #fff; width: 28px; border-radius: 4px; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
+        .banner-dot:hover { background: rgba(255,255,255,0.5); }
+        .banner-arrows { position: absolute; top: 50%; width: 100%; display: flex; justify-content: space-between; padding: 0 1.5rem; transform: translateY(-50%); pointer-events: none; z-index: 10; }
+        .banner-arrow { width: 44px; height: 44px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; color: #fff; font-size: 1.2rem; cursor: pointer; pointer-events: all; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; backdrop-filter: blur(10px); }
+        .banner-arrow:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); border-color: rgba(255,255,255,0.25); }
+
+        /* Progress bar (auto-slide indicator) */
+        .banner-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, #7c3aed, #60a5fa); z-index: 10; animation: slideProgress 5s linear infinite; }
+        @keyframes slideProgress { 0% { width: 0%; } 100% { width: 100%; } }
+
+        @media (max-width: 900px) {
+            .banner-slider { height: 500px; }
+            .banner-slide { flex-direction: column; padding: 2rem 1.5rem; gap: 1rem; text-align: center; }
+            .banner-img { flex: 0 0 160px; height: 160px; }
+            .banner-img::before { width: 140px; height: 140px; }
+            .banner-slide h2 { font-size: 1.5rem; }
+            .banner-cta { justify-content: center; }
+            .banner-features { justify-content: center; }
+            .banner-countdown { justify-content: center; }
+            .banner-price-row { justify-content: center; }
+            .banner-text { max-width: 100%; }
+        }
+        @media (max-width: 480px) {
+            .banner-slider { height: 520px; }
+            .banner-slide { padding: 1.5rem 1rem; }
+            .banner-slide h2 { font-size: 1.25rem; }
+            .banner-img { flex: 0 0 130px; height: 130px; }
+        }
 
         /* ---- Search Bar ---- */
         .search-section { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 1rem 2rem; position: sticky; top: 64px; z-index: 90; }
@@ -275,36 +362,104 @@ if ($searchQuery || $filterCat) {
 </div>
 
 <?php if (!$searchQuery && !$filterCat): ?>
-<!-- Banner Slideshow -->
+<!-- Banner Slideshow (Premium) -->
 <div class="banner-slider" id="bannerSlider">
+    <canvas class="banner-particles" id="particleCanvas"></canvas>
+    <div class="banner-progress" id="bannerProgress"></div>
     <div class="banner-track" id="bannerTrack">
+
+        <!-- Slide 1: RTX 4090 -->
         <div class="banner-slide slide-1">
             <div class="banner-text">
-                <span class="banner-tag">🔥 สินค้ามาใหม่</span>
-                <h2>NVIDIA RTX 4090 พร้อมจำหน่ายแล้ว</h2>
-                <p>พลังกราฟิกระดับสุดยอด สำหรับเกมเมอร์ตัวจริง</p>
-                <div class="banner-price">฿62,900.00</div>
+                <span class="banner-tag tag-fire">🔥 สินค้ายอดนิยม</span>
+                <h2>NVIDIA <span class="text-gradient">RTX 4090</span><br>พลังกราฟิกระดับสูงสุด</h2>
+                <p>GPU ระดับ Flagship สำหรับเกมเมอร์ตัวจริง เล่นเกม 4K Ultra ลื่นไหลไม่มีสะดุด</p>
+                <div class="banner-price-row">
+                    <span class="banner-price">฿62,900</span>
+                    <span class="banner-price-old">฿69,900</span>
+                    <span class="banner-discount">-10%</span>
+                </div>
+                <div class="banner-cta">
+                    <a href="product_detail.php?id=15" class="btn-cta-primary">🛒 ซื้อเลย</a>
+                    <a href="compare.php" class="btn-cta-secondary">⚖️ เทียบสินค้า</a>
+                </div>
+                <div class="banner-features">
+                    <div class="banner-feat"><span>🛡️</span> รับประกัน 3 ปี</div>
+                    <div class="banner-feat"><span>🚚</span> ส่งฟรีทั่วประเทศ</div>
+                    <div class="banner-feat"><span>⭐</span> 5.0 รีวิว</div>
+                </div>
             </div>
             <div class="banner-img"><img src="assets/images/products/product_15.jpg" alt="RTX 4090"></div>
         </div>
+
+        <!-- Slide 2: Gaming Peripherals -->
         <div class="banner-slide slide-2">
             <div class="banner-text">
-                <span class="banner-tag">💎 สินค้าแนะนำ</span>
-                <h2>Gaming Peripherals คุณภาพสูง</h2>
-                <p>เมาส์ คีย์บอร์ด หูฟัง จากแบรนด์ชั้นนำ พร้อมประกัน</p>
-                <div class="banner-price">เริ่มต้น ฿2,990</div>
+                <span class="banner-tag tag-gem">💎 สินค้าแนะนำ</span>
+                <h2>Gaming <span class="text-gradient">Peripherals</span><br>คุณภาพระดับโปร</h2>
+                <p>เมาส์ คีย์บอร์ด หูฟัง จากแบรนด์ชั้นนำ Corsair, Logitech, Razer</p>
+                <div class="banner-price-row">
+                    <span class="banner-price">เริ่มต้น ฿2,490</span>
+                </div>
+                <div class="banner-cta">
+                    <a href="showcase.php#cat-6" class="btn-cta-primary">🎮 ดูสินค้า</a>
+                    <a href="contact.php" class="btn-cta-secondary">💬 สอบถามเพิ่มเติม</a>
+                </div>
+                <div class="banner-features">
+                    <div class="banner-feat"><span>🔧</span> สวิตช์แท้</div>
+                    <div class="banner-feat"><span>🌈</span> RGB Sync</div>
+                    <div class="banner-feat"><span>🏆</span> Esports Grade</div>
+                </div>
             </div>
             <div class="banner-img"><img src="assets/images/products/product_26.jpg" alt="Corsair K70"></div>
         </div>
+
+        <!-- Slide 3: Flash Sale SSD -->
         <div class="banner-slide slide-3">
             <div class="banner-text">
-                <span class="banner-tag">⚡ โปรโมชั่นพิเศษ</span>
-                <h2>SSD คุณภาพสูง ราคาพิเศษ</h2>
-                <p>Samsung, WD, Crucial — NVMe Gen5 เร็วที่สุด</p>
-                <div class="banner-price">เริ่มต้น ฿2,790</div>
+                <span class="banner-tag tag-bolt">⚡ FLASH SALE</span>
+                <h2>NVMe <span class="text-gradient">Gen5 SSD</span><br>เร็วที่สุดในโลก</h2>
+                <p>Samsung 990 Pro, Crucial T700 — อ่านเขียน 12,400 MB/s</p>
+                <div class="banner-countdown" id="countdown">
+                    <div class="cd-box"><span class="cd-num" id="cdH">08</span><span class="cd-label">ชั่วโมง</span></div>
+                    <div class="cd-box"><span class="cd-num" id="cdM">45</span><span class="cd-label">นาที</span></div>
+                    <div class="cd-box"><span class="cd-num" id="cdS">30</span><span class="cd-label">วินาที</span></div>
+                </div>
+                <div class="banner-price-row">
+                    <span class="banner-price">฿2,790</span>
+                    <span class="banner-price-old">฿3,990</span>
+                    <span class="banner-discount">-30%</span>
+                </div>
+                <div class="banner-cta">
+                    <a href="showcase.php#cat-4" class="btn-cta-primary">🔥 ช้อปเลย!</a>
+                    <a href="compare.php" class="btn-cta-secondary">⚖️ เทียบรุ่น</a>
+                </div>
             </div>
             <div class="banner-img"><img src="assets/images/products/samsung_990pro.png" alt="Samsung 990 Pro"></div>
         </div>
+
+        <!-- Slide 4: New Arrivals -->
+        <div class="banner-slide slide-4">
+            <div class="banner-text">
+                <span class="banner-tag tag-new">✨ สินค้ามาใหม่</span>
+                <h2>Ryzen 7 <span class="text-gradient">7800X3D</span><br>ชิป Gaming อันดับ 1</h2>
+                <p>3D V-Cache ทำให้ FPS สูงกว่าคู่แข่งทุกรุ่น เหมาะสำหรับเกมเมอร์สายจัด</p>
+                <div class="banner-price-row">
+                    <span class="banner-price">฿15,900</span>
+                </div>
+                <div class="banner-cta">
+                    <a href="product_detail.php?id=4" class="btn-cta-primary">🚀 ดูรายละเอียด</a>
+                    <a href="showcase.php#cat-2" class="btn-cta-secondary">⚡ CPU ทั้งหมด</a>
+                </div>
+                <div class="banner-features">
+                    <div class="banner-feat"><span>🧠</span> 3D V-Cache</div>
+                    <div class="banner-feat"><span>🎮</span> Best for Gaming</div>
+                    <div class="banner-feat"><span>⭐</span> 5.0 Rating</div>
+                </div>
+            </div>
+            <div class="banner-img"><img src="assets/images/products/ryzen_7800x3d.png" alt="Ryzen 7 7800X3D"></div>
+        </div>
+
     </div>
     <div class="banner-arrows">
         <button class="banner-arrow" onclick="slideBanner(-1)">‹</button>
@@ -314,6 +469,7 @@ if ($searchQuery || $filterCat) {
         <span class="banner-dot active" onclick="goToSlide(0)"></span>
         <span class="banner-dot" onclick="goToSlide(1)"></span>
         <span class="banner-dot" onclick="goToSlide(2)"></span>
+        <span class="banner-dot" onclick="goToSlide(3)"></span>
     </div>
 </div>
 <?php endif; ?>
@@ -497,14 +653,17 @@ if ($searchQuery || $filterCat) {
 <script>
 // Banner Slideshow
 let currentSlide = 0;
-const totalSlides = 3;
+const totalSlides = 4;
 const track = document.getElementById('bannerTrack');
 const dots = document.querySelectorAll('.banner-dot');
+const progress = document.getElementById('bannerProgress');
 
 function goToSlide(n) {
     currentSlide = n;
     if (track) track.style.transform = `translateX(-${n * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('active', i === n));
+    // Restart progress bar
+    if (progress) { progress.style.animation = 'none'; progress.offsetHeight; progress.style.animation = 'slideProgress 5s linear'; }
 }
 
 function slideBanner(dir) {
@@ -512,6 +671,79 @@ function slideBanner(dir) {
     goToSlide(currentSlide);
 }
 setInterval(() => slideBanner(1), 5000);
+
+// Particle Canvas
+(function() {
+    const canvas = document.getElementById('particleCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 50; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 2 + 0.5,
+            dx: (Math.random() - 0.5) * 0.4,
+            dy: (Math.random() - 0.5) * 0.3,
+            opacity: Math.random() * 0.4 + 0.1
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.x += p.dx;
+            p.y += p.dy;
+            if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+            ctx.fill();
+        });
+        // Draw subtle lines between nearby particles
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 100) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(255,255,255,${0.03 * (1 - dist/100)})`;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+    animate();
+})();
+
+// Countdown Timer (Flash Sale)
+(function() {
+    const cdH = document.getElementById('cdH');
+    const cdM = document.getElementById('cdM');
+    const cdS = document.getElementById('cdS');
+    if (!cdH) return;
+    // Set end time: today + some hours
+    let remaining = 8 * 3600 + 45 * 60 + 30;
+    setInterval(() => {
+        remaining--;
+        if (remaining < 0) remaining = 12 * 3600; // Reset
+        const h = Math.floor(remaining / 3600);
+        const m = Math.floor((remaining % 3600) / 60);
+        const s = remaining % 60;
+        cdH.textContent = String(h).padStart(2, '0');
+        cdM.textContent = String(m).padStart(2, '0');
+        cdS.textContent = String(s).padStart(2, '0');
+    }, 1000);
+})();
 
 // Dark Mode Toggle
 function toggleTheme() {
