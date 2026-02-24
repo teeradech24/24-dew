@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    if ($username === 'root' && $password === '1234') {
+    if ($username === 'admin' && $password === '1234') {
         $_SESSION['logged_in'] = true;
         $_SESSION['username'] = $username;
         header('Location: index.php');
