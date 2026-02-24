@@ -1,4 +1,5 @@
 <?php
+require_once 'auth.php';
 require_once 'db.php';
 
 $message = '';
@@ -68,7 +69,7 @@ $products = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products — Gaming Store Inventory</title>
+    <title>Products — GamePro Inventory</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -78,7 +79,7 @@ $products = $pdo->query("
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <div class="logo-icon">🎮</div>
-                <span>Gaming Store</span>
+                <span>GamePro</span>
             </div>
         </div>
         <nav class="sidebar-nav">
@@ -95,9 +96,19 @@ $products = $pdo->query("
                 <span class="nav-icon">💰</span>
                 <span>Sales</span>
             </a>
+            <div class="nav-section-title">หน้าร้าน</div>
+            <a href="showcase.php" class="nav-link">
+                <span class="nav-icon">🛍️</span>
+                <span>Showcase</span>
+            </a>
+            <div class="nav-section-title">บัญชี</div>
+            <a href="logout.php" class="nav-link">
+                <span class="nav-icon">🚪</span>
+                <span>ออกจากระบบ</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
-            Gaming Store Inventory v1.0
+            GamePro Inventory v1.0
         </div>
     </aside>
 

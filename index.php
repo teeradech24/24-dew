@@ -1,4 +1,5 @@
 <?php
+require_once 'auth.php';
 require_once 'db.php';
 
 // Query stats
@@ -22,7 +23,7 @@ $recentSales = $pdo->query("
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — Gaming Store Inventory</title>
+    <title>Dashboard — GamePro Inventory</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -32,7 +33,7 @@ $recentSales = $pdo->query("
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <div class="logo-icon">🎮</div>
-                <span>Gaming Store</span>
+                <span>GamePro</span>
             </div>
         </div>
         <nav class="sidebar-nav">
@@ -49,9 +50,19 @@ $recentSales = $pdo->query("
                 <span class="nav-icon">💰</span>
                 <span>Sales</span>
             </a>
+            <div class="nav-section-title">หน้าร้าน</div>
+            <a href="showcase.php" class="nav-link">
+                <span class="nav-icon">🛍️</span>
+                <span>Showcase</span>
+            </a>
+            <div class="nav-section-title">บัญชี</div>
+            <a href="logout.php" class="nav-link">
+                <span class="nav-icon">🚪</span>
+                <span>ออกจากระบบ</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
-            Gaming Store Inventory v1.0
+            GamePro Inventory v1.0
         </div>
     </aside>
 
@@ -59,7 +70,7 @@ $recentSales = $pdo->query("
     <main class="main-content">
         <div class="page-header">
             <h1 class="page-title">Dashboard</h1>
-            <p class="page-subtitle">ภาพรวมร้านค้าอุปกรณ์เกมมิ่ง</p>
+            <p class="page-subtitle">ภาพรวม GamePro Inventory</p>
         </div>
 
         <!-- Stat Cards -->
