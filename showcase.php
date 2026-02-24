@@ -342,7 +342,12 @@ if ($searchQuery || $filterCat) {
         <a href="wishlist.php">❤️ Wishlist</a>
         <a href="orders.php">📋 คำสั่งซื้อ</a>
         <a href="contact.php">📧 ติดต่อ</a>
-        <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+            <a href="profile.php">👤 <?= htmlspecialchars($_SESSION['username'] ?? 'โปรไฟล์') ?></a>
+            <a href="logout.php">🚪 ออก</a>
+        <?php else: ?>
+            <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php endif; ?>
         <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม" id="themeBtn">🌙</button>
     </div>
     <div style="display:flex;gap:0.5rem;align-items:center;">
@@ -357,7 +362,12 @@ if ($searchQuery || $filterCat) {
     <a href="wishlist.php">❤️ Wishlist</a>
     <a href="orders.php">📋 คำสั่งซื้อ</a>
     <a href="contact.php">📧 ติดต่อเรา</a>
-    <a href="login.php">🔐 เข้าสู่ระบบ</a>
+    <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+        <a href="profile.php">👤 โปรไฟล์</a>
+        <a href="logout.php">🚪 ออกจากระบบ</a>
+    <?php else: ?>
+        <a href="login.php">🔐 เข้าสู่ระบบ</a>
+    <?php endif; ?>
     <a href="#" onclick="toggleTheme();return false;" id="mobileThemeLink">🌙 Dark Mode</a>
 </div>
 

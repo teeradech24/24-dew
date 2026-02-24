@@ -170,6 +170,147 @@ switch ($action) {
         }
         break;
 
+    case 'full_checkout':
+        if (empty($_SESSION['cart'])) {
+            echo json_encode(['ok' => false, 'msg' => 'ตะกร้าว่างเปล่า']);
+            exit;
+        }
+        $shipName = trim($_POST['shipping_name'] ?? '');
+        $shipPhone = trim($_POST['shipping_phone'] ?? '');
+        $shipAddress = trim($_POST['shipping_address'] ?? '');
+        $paymentMethod = trim($_POST['payment_method'] ?? 'transfer');
+        $couponCode = strtoupper(trim($_POST['coupon_code'] ?? ''));
+        $pointsUsed = (int)($_POST['points_used'] ?? 0);
+        $codFee = (int)($_POST['cod_fee'] ?? 0);
+        $userId = $_SESSION['user_id'] ?? null;
+
+        if (!$shipName || !$shipPhone || !$shipAddress) {
+            echo json_encode(['ok' => false, 'msg' => 'กรุณากรอกข้อมูลจัดส่งให้ครบ']);
+            exit;
+        }
+
+        try {
+            $pdo->beginTransaction();
+            $orderNum = 'GP-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $total = 0;
+            $orderItems = [];
+
+            foreach ($_SESSION['cart'] as $pid => $q) {
+                $stmt = $pdo->prepare("SELECT id, name, price, stock_quantity FROM products WHERE id = ?");
+                $stmt->execute([$pid]);
+                $p = $stmt->fetch();
+                if (!$p) continue;
+                $sub = $p['price'] * $q;
+                $total += $sub;
+                $orderItems[] = ['pid' => $pid, 'name' => $p['name'], 'price' => $p['price'], 'qty' => $q, 'sub' => $sub];
+            }
+
+            // Add COD fee
+            $total += $codFee;
+
+            // Apply coupon
+            $couponDiscount = 0;
+            if ($couponCode) {
+                $cs = $pdo->prepare("SELECT * FROM coupons WHERE code = ? AND is_active = 1");
+                $cs->execute([$couponCode]);
+                $cp = $cs->fetch();
+                if ($cp && (!$cp['expires_at'] || strtotime($cp['expires_at']) >= time()) && (!$cp['max_uses'] || $cp['used_count'] < $cp['max_uses']) && ($total - $codFee) >= $cp['min_order']) {
+                    $couponDiscount = $cp['discount_type'] === 'percent' ? (($total - $codFee) * $cp['discount_value'] / 100) : $cp['discount_value'];
+                    $couponDiscount = min($couponDiscount, $total);
+                    $pdo->prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?")->execute([$cp['id']]);
+                }
+            }
+
+            // Validate & apply points
+            if ($pointsUsed > 0 && $userId) {
+                $uStmt = $pdo->prepare("SELECT loyalty_points FROM users WHERE id = ?");
+                $uStmt->execute([$userId]);
+                $uData = $uStmt->fetch();
+                if (!$uData || $pointsUsed > $uData['loyalty_points']) {
+                    $pointsUsed = min($pointsUsed, (int)($uData['loyalty_points'] ?? 0));
+                }
+            } else {
+                $pointsUsed = 0;
+            }
+
+            $totalDiscount = $couponDiscount + $pointsUsed;
+            $finalTotal = max(0, $total - $totalDiscount);
+
+            // Create order
+            $stmt = $pdo->prepare("INSERT INTO orders (order_number, user_id, customer_name, total_amount, status, shipping_name, shipping_phone, shipping_address, payment_method, points_used, discount_amount) VALUES (?, ?, ?, ?, 'confirmed', ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$orderNum, $userId, $shipName, $finalTotal, $shipName, $shipPhone, $shipAddress, $paymentMethod, $pointsUsed, $totalDiscount]);
+            $orderId = $pdo->lastInsertId();
+
+            // Insert order items & update stock
+            $ins = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, price, quantity, subtotal) VALUES (?, ?, ?, ?, ?, ?)");
+            foreach ($orderItems as $item) {
+                $ins->execute([$orderId, $item['pid'], $item['name'], $item['price'], $item['qty'], $item['sub']]);
+                $pdo->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?")->execute([$item['qty'], $item['pid'], $item['qty']]);
+            }
+
+            // Loyalty: redeem points
+            if ($pointsUsed > 0 && $userId) {
+                $pdo->prepare("UPDATE users SET loyalty_points = loyalty_points - ? WHERE id = ?")->execute([$pointsUsed, $userId]);
+                $pdo->prepare("INSERT INTO loyalty_transactions (user_id, order_id, type, points, description) VALUES (?, ?, 'redeem', ?, ?)")
+                    ->execute([$userId, $orderId, $pointsUsed, "ใช้แต้มลดราคา Order #{$orderNum}"]);
+            }
+
+            // Loyalty: earn points
+            $pointsEarned = 0;
+            if ($userId) {
+                $tier = 'bronze';
+                $uStmt = $pdo->prepare("SELECT loyalty_tier, total_spent FROM users WHERE id = ?");
+                $uStmt->execute([$userId]);
+                $uData = $uStmt->fetch();
+                if ($uData) $tier = $uData['loyalty_tier'] ?: 'bronze';
+
+                $rates = ['bronze' => 1.0, 'silver' => 1.5, 'gold' => 2.0, 'diamond' => 3.0];
+                $rate = $rates[$tier] ?? 1.0;
+                $pointsEarned = (int)floor($finalTotal / 100 * $rate);
+
+                if ($pointsEarned > 0) {
+                    $pdo->prepare("UPDATE users SET loyalty_points = loyalty_points + ?, total_spent = total_spent + ? WHERE id = ?")
+                        ->execute([$pointsEarned, $finalTotal, $userId]);
+                    $pdo->prepare("INSERT INTO loyalty_transactions (user_id, order_id, type, points, description) VALUES (?, ?, 'earn', ?, ?)")
+                        ->execute([$userId, $orderId, $pointsEarned, "สะสมแต้มจาก Order #{$orderNum}"]);
+
+                    // Update points_earned in order
+                    $pdo->prepare("UPDATE orders SET points_earned = ? WHERE id = ?")->execute([$pointsEarned, $orderId]);
+
+                    // Check tier upgrade
+                    $newTotal = ($uData['total_spent'] ?? 0) + $finalTotal;
+                    $newTier = 'bronze';
+                    if ($newTotal >= 100000) $newTier = 'diamond';
+                    elseif ($newTotal >= 30000) $newTier = 'gold';
+                    elseif ($newTotal >= 10000) $newTier = 'silver';
+                    
+                    if ($newTier !== $tier) {
+                        $pdo->prepare("UPDATE users SET loyalty_tier = ? WHERE id = ?")->execute([$newTier, $userId]);
+                    }
+                }
+
+                // Save address to user profile
+                $pdo->prepare("UPDATE users SET phone = COALESCE(NULLIF(phone, ''), ?), address = COALESCE(NULLIF(address, ''), ?) WHERE id = ?")
+                    ->execute([$shipPhone, $shipAddress, $userId]);
+            }
+
+            $pdo->commit();
+            $_SESSION['cart'] = [];
+            echo json_encode([
+                'ok' => true,
+                'order_number' => $orderNum,
+                'total' => $finalTotal,
+                'discount' => $totalDiscount,
+                'points_earned' => $pointsEarned,
+                'points_used' => $pointsUsed,
+                'count' => 0
+            ]);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            echo json_encode(['ok' => false, 'msg' => 'เกิดข้อผิดพลาดในการสั่งซื้อ']);
+        }
+        break;
+
     default:
         echo json_encode(['ok' => false, 'msg' => 'Unknown action']);
 }

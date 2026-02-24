@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'db.php';
 
 // Get product ID
@@ -175,7 +176,12 @@ function renderStars($rating) {
         <a href="wishlist.php">❤️ Wishlist</a>
         <a href="orders.php">📋 คำสั่งซื้อ</a>
         <a href="contact.php">📧 ติดต่อ</a>
-        <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+            <a href="profile.php">👤 <?= htmlspecialchars($_SESSION['username'] ?? 'โปรไฟล์') ?></a>
+            <a href="logout.php">🚪 ออก</a>
+        <?php else: ?>
+            <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php endif; ?>
         <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม">🌙</button>
     </div>
 </nav>

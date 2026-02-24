@@ -50,7 +50,12 @@ $statusColors = ['pending'=>'#f59e0b','confirmed'=>'#16a34a','shipped'=>'#2563eb
         <a href="showcase.php">🏠 หน้าแรก</a>
         <a href="cart.php">🛒 ตะกร้า <span class="cart-badge" id="cartBadge">0</span></a>
         <a href="orders.php" style="color:var(--text-primary);font-weight:600">📋 คำสั่งซื้อ</a>
-        <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+            <a href="profile.php">👤 <?= htmlspecialchars($_SESSION['username'] ?? 'โปรไฟล์') ?></a>
+            <a href="logout.php">🚪 ออก</a>
+        <?php else: ?>
+            <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <?php endif; ?>
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
     </div>
 </nav>
