@@ -80,6 +80,47 @@ switch ($action) {
         echo json_encode(['ok' => true, 'count' => array_sum($_SESSION['cart'])]);
         break;
 
+    case 'checkout':
+        if (empty($_SESSION['cart'])) {
+            echo json_encode(['ok' => false, 'msg' => 'ตะกร้าว่างเปล่า']);
+            exit;
+        }
+        try {
+            $pdo->beginTransaction();
+            $orderNum = 'GP-' . date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
+            $total = 0;
+            $orderItems = [];
+
+            foreach ($_SESSION['cart'] as $pid => $q) {
+                $stmt = $pdo->prepare("SELECT id, name, price, stock_quantity FROM products WHERE id = ?");
+                $stmt->execute([$pid]);
+                $p = $stmt->fetch();
+                if (!$p) continue;
+                $sub = $p['price'] * $q;
+                $total += $sub;
+                $orderItems[] = ['pid' => $pid, 'name' => $p['name'], 'price' => $p['price'], 'qty' => $q, 'sub' => $sub];
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO orders (order_number, total_amount, status) VALUES (?, ?, 'confirmed')");
+            $stmt->execute([$orderNum, $total]);
+            $orderId = $pdo->lastInsertId();
+
+            $ins = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, price, quantity, subtotal) VALUES (?, ?, ?, ?, ?, ?)");
+            foreach ($orderItems as $item) {
+                $ins->execute([$orderId, $item['pid'], $item['name'], $item['price'], $item['qty'], $item['sub']]);
+                // Deduct stock
+                $pdo->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?")->execute([$item['qty'], $item['pid'], $item['qty']]);
+            }
+
+            $pdo->commit();
+            $_SESSION['cart'] = [];
+            echo json_encode(['ok' => true, 'order_number' => $orderNum, 'total' => $total, 'count' => 0]);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            echo json_encode(['ok' => false, 'msg' => 'เกิดข้อผิดพลาดในการสั่งซื้อ']);
+        }
+        break;
+
     default:
         echo json_encode(['ok' => false, 'msg' => 'Unknown action']);
 }

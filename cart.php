@@ -200,12 +200,24 @@ async function clearCart() {
     loadCart();
 }
 
-function checkout() {
-    showToast('✅ สั่งซื้อสำเร็จ! ขอบคุณที่ใช้บริการ');
-    setTimeout(async () => {
-        await cartAction('clear');
-        loadCart();
-    }, 2000);
+async function checkout() {
+    const data = await cartAction('checkout');
+    if (data.ok) {
+        document.getElementById('cartContent').innerHTML = `
+            <div class="cart-empty" style="padding:3rem">
+                <div class="empty-icon">✅</div>
+                <p style="font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem">สั่งซื้อสำเร็จ!</p>
+                <p style="color:var(--text-secondary);margin-bottom:0.3rem">หมายเลขคำสั่งซื้อ: <strong>${data.order_number}</strong></p>
+                <p style="color:var(--text-muted);margin-bottom:1.5rem">ยอดรวม: ฿${Number(data.total).toLocaleString('th-TH',{minimumFractionDigits:2})}</p>
+                <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+                    <a href="orders.php" style="padding:0.7rem 1.5rem;background:#1a1a1a;color:#fff;border-radius:8px;font-weight:600;font-size:0.9rem">📋 ดูประวัติคำสั่งซื้อ</a>
+                    <a href="showcase.php" style="padding:0.7rem 1.5rem;background:var(--bg-tertiary);color:var(--text-primary);border-radius:8px;font-weight:600;font-size:0.9rem;border:1px solid var(--border)">🏠 กลับหน้าแรก</a>
+                </div>
+            </div>`;
+        document.getElementById('cartBadge').textContent = '0';
+    } else {
+        showToast(data.msg || 'เกิดข้อผิดพลาด');
+    }
 }
 
 loadCart();

@@ -560,5 +560,14 @@ loadRecentlyViewed();
 
 <div class="toast" id="toast"></div>
 
+<!-- Back to Top -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="position:fixed;bottom:2rem;right:2rem;width:48px;height:48px;border-radius:50%;background:var(--bg-secondary);border:1px solid var(--border);box-shadow:var(--shadow-lg);cursor:pointer;font-size:1.3rem;display:none;align-items:center;justify-content:center;z-index:90;transition:var(--transition);">⬆️</button>
+<script>
+window.addEventListener('scroll', () => {
+    const btn = document.getElementById('backToTop');
+    btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+</script>
+
 </body>
 </html>

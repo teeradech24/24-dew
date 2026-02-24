@@ -25,6 +25,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($name && $category_id > 0 && $price > 0) {
         $stmt = $pdo->prepare("INSERT INTO products (category_id, name, description, price, stock_quantity) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$category_id, $name, $description, $price, $stock]);
+        $newId = $pdo->lastInsertId();
+        
+        // Handle image upload
+        if (!empty($_FILES['image']['tmp_name']) && $_FILES['image']['error'] === 0) {
+            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) {
+                $filename = 'product_' . $newId . '.' . $ext;
+                $dest = __DIR__ . '/assets/images/products/' . $filename;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $dest)) {
+                    $pdo->prepare("UPDATE products SET image_url = ? WHERE id = ?")->execute(['assets/images/products/' . $filename, $newId]);
+                }
+            }
+        }
+        
         $message = 'เพิ่มสินค้าเรียบร้อยแล้ว';
         $messageType = 'success';
     } else {
@@ -45,6 +59,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if ($id > 0 && $name && $category_id > 0 && $price > 0) {
         $stmt = $pdo->prepare("UPDATE products SET category_id = ?, name = ?, description = ?, price = ?, stock_quantity = ? WHERE id = ?");
         $stmt->execute([$category_id, $name, $description, $price, $stock, $id]);
+        
+        // Handle image upload
+        if (!empty($_FILES['image']['tmp_name']) && $_FILES['image']['error'] === 0) {
+            $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, ['jpg','jpeg','png','gif','webp'])) {
+                $filename = 'product_' . $id . '.' . $ext;
+                $dest = __DIR__ . '/assets/images/products/' . $filename;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $dest)) {
+                    $pdo->prepare("UPDATE products SET image_url = ? WHERE id = ?")->execute(['assets/images/products/' . $filename, $id]);
+                }
+            }
+        }
+        
         $message = 'แก้ไขสินค้าเรียบร้อยแล้ว';
         $messageType = 'success';
     } else {
@@ -192,7 +219,7 @@ $products = $pdo->query("
             <h3 class="modal-title">➕ เพิ่มสินค้าใหม่</h3>
             <button class="modal-close" onclick="closeModal('addModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="add">
             <div class="modal-body">
                 <div class="form-group">
@@ -222,6 +249,10 @@ $products = $pdo->query("
                         <input type="number" name="stock_quantity" class="form-control" required min="0" value="0">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">🖼️ รูปสินค้า</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">ยกเลิก</button>
@@ -238,7 +269,7 @@ $products = $pdo->query("
             <h3 class="modal-title">✏️ แก้ไขสินค้า</h3>
             <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
         </div>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="id" id="edit-id">
             <div class="modal-body">
@@ -268,6 +299,10 @@ $products = $pdo->query("
                         <label class="form-label">จำนวน Stock *</label>
                         <input type="number" name="stock_quantity" id="edit-stock" class="form-control" required min="0">
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🖼️ รูปสินค้า (เปลี่ยนรูปใหม่)</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
