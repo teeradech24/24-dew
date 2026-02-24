@@ -201,14 +201,21 @@ $categoryIcons = [
         }
         .product-img {
             width: 100%;
-            height: 180px;
-            background: var(--bg-tertiary);
+            height: 200px;
+            background: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 3.5rem;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 0.5rem;
         }
         .product-info {
             padding: 1rem;
@@ -322,7 +329,11 @@ $categoryIcons = [
                 <?php foreach ($products as $p): ?>
                 <div class="product-card">
                     <div class="product-img">
-                        <?= $icon ?>
+                        <?php if (!empty($p['image_url'])): ?>
+                            <img src="<?= htmlspecialchars($p['image_url']) ?>" alt="<?= htmlspecialchars($p['name']) ?>">
+                        <?php else: ?>
+                            <?= $icon ?>
+                        <?php endif; ?>
                     </div>
                     <div class="product-info">
                         <div class="product-category-tag"><?= htmlspecialchars($cat['name']) ?></div>
