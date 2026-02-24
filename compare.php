@@ -215,5 +215,6 @@ function clearCompare() {
     try { const r = await fetch('cart_api.php?action=count'); const d = await r.json(); document.getElementById('cartBadge').textContent = d.count||0; } catch(e){}
 })();
 </script>
+<a href="javascript:history.back()" class="btn-back-float" title="ย้อนกลับ">←</a>
 </body>
 </html>

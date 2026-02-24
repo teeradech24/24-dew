@@ -124,5 +124,6 @@ function markRead(id) {
     fetch('admin_contacts.php?read=' + id);
 }
 </script>
+<a href="javascript:history.back()" class="btn-back-float" title="ย้อนกลับ">←</a>
 </body>
 </html>

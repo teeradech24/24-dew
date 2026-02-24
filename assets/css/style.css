@@ -772,6 +772,57 @@ textarea.form-control {
     }
 }
 
+/* ---- Floating Back Button ---- */
+.btn-back-float {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: 46px;
+    height: 46px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-back-float:hover {
+    transform: scale(1.12);
+    background: var(--accent);
+    color: var(--bg-primary);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .btn-back-float {
+    background: #1e1e1e;
+    border-color: #333;
+    color: #f0f0f0;
+}
+
+[data-theme="dark"] .btn-back-float:hover {
+    background: #f0f0f0;
+    color: #1a1a1a;
+}
+
+/* Admin pages: offset for sidebar */
+.app-layout .btn-back-float {
+    left: calc(var(--sidebar-width) + 1.5rem);
+}
+
+@media (max-width: 768px) {
+    .app-layout .btn-back-float {
+        left: 1.5rem;
+    }
+}
+
 .mobile-menu-btn {
     display: none;
     position: fixed;

@@ -409,5 +409,6 @@ document.addEventListener('click', e => {
 // Auto check stock alerts
 fetch('notifications_api.php?action=check_stock').catch(()=>{});
 </script>
+<a href="javascript:history.back()" class="btn-back-float" title="ย้อนกลับ">←</a>
 </body>
 </html>

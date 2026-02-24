@@ -458,5 +458,6 @@ function addToCompare(id) {
 
 <div class="toast" id="toast"></div>
 
+<a href="javascript:history.back()" class="btn-back-float" title="ย้อนกลับ">←</a>
 </body>
 </html>

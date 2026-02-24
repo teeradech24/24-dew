@@ -375,5 +375,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 </script>
+<a href="javascript:history.back()" class="btn-back-float" title="ย้อนกลับ">←</a>
 </body>
 </html>
