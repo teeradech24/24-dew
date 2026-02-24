@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0f0f0"/>
+  <rect x="70" y="80" width="260" height="170" rx="8" fill="#1a1a1a"/>
+  <rect x="80" y="90" width="240" height="150" rx="4" fill="#2563eb"/>
+  <rect x="170" y="250" width="60" height="40" fill="#333"/>
+  <rect x="130" y="290" width="140" height="10" rx="5" fill="#444"/>
+  <text x="200" y="340" text-anchor="middle" font-family="Arial" font-size="14" fill="#666">LG 27GP850-B</text>
+</svg>

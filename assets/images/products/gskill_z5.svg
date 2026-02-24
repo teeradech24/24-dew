@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#f0f0f0"/>
+  <rect x="120" y="100" width="160" height="200" rx="8" fill="#4f46e5"/>
+  <rect x="130" y="110" width="140" height="30" rx="4" fill="#6366f1"/>
+  <rect x="130" y="150" width="140" height="30" rx="4" fill="#6366f1"/>
+  <rect x="155" y="190" width="12" height="80" rx="2" fill="#818cf8"/>
+  <rect x="175" y="190" width="12" height="80" rx="2" fill="#a5b4fc"/>
+  <rect x="195" y="190" width="12" height="80" rx="2" fill="#818cf8"/>
+  <rect x="215" y="190" width="12" height="80" rx="2" fill="#a5b4fc"/>
+  <rect x="235" y="190" width="12" height="80" rx="2" fill="#818cf8"/>
+  <text x="200" y="340" text-anchor="middle" font-family="Arial" font-size="14" fill="#666">G.Skill Trident Z5 RGB</text>
+</svg>
