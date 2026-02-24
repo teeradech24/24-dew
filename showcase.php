@@ -109,6 +109,18 @@ if ($searchQuery || $filterCat) {
         .search-bar select { padding: 0.6rem 0.8rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem; outline: none; }
         .search-bar button { padding: 0.6rem 1.2rem; background: #1a1a1a; color: #fff; border: none; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
         .search-bar button:hover { background: #333; }
+        .search-wrapper { position: relative; flex: 1; }
+        .ac-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); z-index: 200; display: none; max-height: 320px; overflow-y: auto; margin-top: 4px; }
+        .ac-dropdown.open { display: block; }
+        .ac-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.8rem; cursor: pointer; transition: var(--transition); text-decoration: none; color: var(--text-primary); }
+        .ac-item:hover, .ac-item.active { background: var(--bg-tertiary); }
+        .ac-item-img { width: 40px; height: 40px; border-radius: 4px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        [data-theme='dark'] .ac-item-img { background: #1a1a1a; }
+        .ac-item-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .ac-item-info { flex: 1; min-width: 0; }
+        .ac-item-name { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); }
+        .ac-item-cat { font-size: 0.7rem; color: var(--text-muted); }
+        .ac-item-price { font-size: 0.85rem; font-weight: 800; color: var(--text-primary); white-space: nowrap; }
 
         /* ---- Category Nav ---- */
         .cat-nav { display: flex; gap: 0.5rem; padding: 0.75rem 2rem; overflow-x: auto; background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
@@ -300,8 +312,11 @@ if ($searchQuery || $filterCat) {
 
 <!-- Search Bar -->
 <div class="search-section">
-    <form class="search-bar" method="GET">
-        <input type="text" name="q" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($searchQuery) ?>">
+    <form class="search-bar" method="GET" autocomplete="off">
+        <div class="search-wrapper">
+            <input type="text" name="q" id="searchInput" placeholder="🔍 ค้นหาสินค้า..." value="<?= htmlspecialchars($searchQuery) ?>">
+            <div class="ac-dropdown" id="acDropdown"></div>
+        </div>
         <select name="cat">
             <option value="0">ทุกหมวดหมู่</option>
             <?php foreach ($categories as $cat): ?>
@@ -555,6 +570,55 @@ loadRecentlyViewed();
         const data = await res.json();
         document.getElementById('cartBadge').textContent = data.count || 0;
     } catch(e) {}
+})();
+
+// Search Autocomplete
+(function() {
+    const input = document.getElementById('searchInput');
+    const dropdown = document.getElementById('acDropdown');
+    if (!input || !dropdown) return;
+    let timer = null;
+    let activeIdx = -1;
+
+    input.addEventListener('input', function() {
+        clearTimeout(timer);
+        const q = this.value.trim();
+        if (q.length < 2) { dropdown.classList.remove('open'); return; }
+        timer = setTimeout(async () => {
+            try {
+                const res = await fetch('search_api.php?q=' + encodeURIComponent(q));
+                const data = await res.json();
+                if (!data.results || data.results.length === 0) { dropdown.classList.remove('open'); return; }
+                activeIdx = -1;
+                dropdown.innerHTML = data.results.map((p, i) => `
+                    <a href="product_detail.php?id=${p.id}" class="ac-item" data-idx="${i}">
+                        <div class="ac-item-img">${p.image_url ? `<img src="${p.image_url}" alt="">` : '<span style="font-size:1.2rem">📦</span>'}</div>
+                        <div class="ac-item-info">
+                            <div class="ac-item-name">${p.name}</div>
+                            <div class="ac-item-cat">${p.category_name}</div>
+                        </div>
+                        <div class="ac-item-price">฿${Number(p.price).toLocaleString('th-TH',{minimumFractionDigits:2})}</div>
+                    </a>
+                `).join('');
+                dropdown.classList.add('open');
+            } catch(e) {}
+        }, 250);
+    });
+
+    input.addEventListener('keydown', function(e) {
+        const items = dropdown.querySelectorAll('.ac-item');
+        if (!items.length || !dropdown.classList.contains('open')) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
+        else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); items[activeIdx].click(); return; }
+        else if (e.key === 'Escape') { dropdown.classList.remove('open'); return; }
+        else return;
+        items.forEach((it, i) => it.classList.toggle('active', i === activeIdx));
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) dropdown.classList.remove('open');
+    });
 })();
 </script>
 

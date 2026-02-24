@@ -60,6 +60,17 @@
         .toast.show { transform: translateX(0); }
         .toast.success { border-left: 3px solid #16a34a; }
 
+        /* Coupon */
+        .coupon-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .coupon-input { flex: 1; padding: 0.55rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .coupon-input::placeholder { text-transform: none; letter-spacing: normal; font-weight: 400; }
+        .btn-coupon { padding: 0.55rem 1rem; background: #7c3aed; color: #fff; border: none; border-radius: var(--radius-sm); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+        .btn-coupon:hover { background: #6d28d9; }
+        .coupon-msg { font-size: 0.78rem; margin-bottom: 0.5rem; font-weight: 600; }
+        .coupon-msg.ok { color: #16a34a; }
+        .coupon-msg.err { color: #dc2626; }
+        .discount-row { color: #16a34a; font-weight: 700; }
+
         @media (max-width: 768px) {
             .cart-container { padding: 1rem; }
             .cart-item { flex-wrap: wrap; }
@@ -163,13 +174,19 @@ async function loadCart() {
 
     html += `
     <div class="cart-summary">
+        <div class="coupon-row">
+            <input type="text" id="couponInput" class="coupon-input" placeholder="🎟️ ใส่โค้ดคูปอง" maxlength="20">
+            <button class="btn-coupon" onclick="applyCoupon()">ใช้คูปอง</button>
+        </div>
+        <div id="couponMsg"></div>
         <div class="cart-summary-row">
             <span>สินค้า ${data.items.length} รายการ (${data.count} ชิ้น)</span>
             <span>฿${data.total.toLocaleString('th-TH', {minimumFractionDigits:2})}</span>
         </div>
+        <div id="discountRow"></div>
         <div class="cart-summary-total">
             <span>รวมทั้งหมด</span>
-            <span>฿${data.total.toLocaleString('th-TH', {minimumFractionDigits:2})}</span>
+            <span id="finalTotal">฿${data.total.toLocaleString('th-TH', {minimumFractionDigits:2})}</span>
         </div>
         <div class="cart-actions">
             <button class="btn-checkout" onclick="checkout()">✅ สั่งซื้อสินค้า</button>
@@ -200,14 +217,49 @@ async function clearCart() {
     loadCart();
 }
 
-async function checkout() {
-    const data = await cartAction('checkout');
+let activeCoupon = null;
+
+async function applyCoupon() {
+    const code = document.getElementById('couponInput').value.trim();
+    if (!code) return;
+    const form = new FormData();
+    form.append('action', 'validate_coupon');
+    form.append('code', code);
+    const res = await fetch('cart_api.php', { method: 'POST', body: form });
+    const data = await res.json();
+    const msgEl = document.getElementById('couponMsg');
+    const discountEl = document.getElementById('discountRow');
+    const totalEl = document.getElementById('finalTotal');
     if (data.ok) {
+        activeCoupon = data.code;
+        msgEl.innerHTML = `<div class="coupon-msg ok">✅ ใช้คูปอง ${data.code} สำเร็จ! ลด ${data.label}</div>`;
+        discountEl.innerHTML = `<div class="cart-summary-row discount-row"><span>🎟️ ส่วนลดคูปอง (${data.label})</span><span>-฿${data.discount.toLocaleString('th-TH',{minimumFractionDigits:2})}</span></div>`;
+        totalEl.textContent = `฿${data.new_total.toLocaleString('th-TH',{minimumFractionDigits:2})}`;
+        showToast('🎟️ ใช้คูปองสำเร็จ!');
+    } else {
+        activeCoupon = null;
+        msgEl.innerHTML = `<div class="coupon-msg err">❌ ${data.msg}</div>`;
+        discountEl.innerHTML = '';
+    }
+}
+
+async function checkout() {
+    const form = new FormData();
+    form.append('action', 'checkout');
+    if (activeCoupon) form.append('coupon_code', activeCoupon);
+    const res = await fetch('cart_api.php', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.ok) {
+        let discountLine = '';
+        if (data.discount > 0) {
+            discountLine = `<p style="color:#16a34a;margin-bottom:0.3rem">ส่วนลด: -฿${Number(data.discount).toLocaleString('th-TH',{minimumFractionDigits:2})}</p>`;
+        }
         document.getElementById('cartContent').innerHTML = `
             <div class="cart-empty" style="padding:3rem">
                 <div class="empty-icon">✅</div>
                 <p style="font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem">สั่งซื้อสำเร็จ!</p>
                 <p style="color:var(--text-secondary);margin-bottom:0.3rem">หมายเลขคำสั่งซื้อ: <strong>${data.order_number}</strong></p>
+                ${discountLine}
                 <p style="color:var(--text-muted);margin-bottom:1.5rem">ยอดรวม: ฿${Number(data.total).toLocaleString('th-TH',{minimumFractionDigits:2})}</p>
                 <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
                     <a href="orders.php" style="padding:0.7rem 1.5rem;background:#1a1a1a;color:#fff;border-radius:8px;font-weight:600;font-size:0.9rem">📋 ดูประวัติคำสั่งซื้อ</a>
