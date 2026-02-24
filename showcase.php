@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'db.php';
 
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name")->fetchAll();
@@ -30,6 +31,15 @@ $categoryIcons = [
     'Storage' => '💾', 'Monitors' => '🖥️', 'Peripherals' => '🎮',
 ];
 
+// Badge logic
+function getBadge($product) {
+    $daysSinceCreated = (time() - strtotime($product['created_at'])) / 86400;
+    if ($daysSinceCreated < 7) return '<div class="product-badge"><span class="badge-new">NEW</span></div>';
+    if ($product['price'] >= 15000) return '<div class="product-badge"><span class="badge-hot">HOT</span></div>';
+    if ($product['stock_quantity'] > 0 && $product['stock_quantity'] < 5) return '<div class="product-badge"><span class="badge-sale">SALE</span></div>';
+    return '';
+}
+
 // Search
 $searchQuery = trim($_GET['q'] ?? '');
 $filterCat = (int)($_GET['cat'] ?? 0);
@@ -52,7 +62,7 @@ if ($searchQuery || $filterCat) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -146,6 +156,50 @@ if ($searchQuery || $filterCat) {
         .search-results h2 { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 1rem; font-weight: 700; }
         .no-results { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 1rem; }
 
+        /* ---- Product Badge ---- */
+        .product-badge { position: absolute; top: 0.5rem; left: 0.5rem; z-index: 2; }
+        .product-badge span { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-new { background: #2563eb; color: #fff; }
+        .badge-hot { background: #dc2626; color: #fff; }
+        .badge-sale { background: #16a34a; color: #fff; }
+        .product-card { position: relative; }
+
+        /* ---- Dark Mode Toggle ---- */
+        .theme-toggle { width: 36px; height: 36px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: var(--transition); }
+        .theme-toggle:hover { background: var(--bg-primary); transform: scale(1.1); }
+        [data-theme='dark'] .product-img { background: #1a1a1a; }
+        [data-theme='dark'] .top-nav-logo .logo-icon { background: linear-gradient(135deg, #333, #555); }
+        [data-theme='dark'] .banner-slider { background: #0a0a0a; }
+        [data-theme='dark'] .cat-nav a:hover, [data-theme='dark'] .cat-nav a.active { background: #f0f0f0; color: #1a1a1a; border-color: #f0f0f0; }
+        [data-theme='dark'] .search-bar button { background: #f0f0f0; color: #1a1a1a; }
+
+        /* ---- Hamburger Menu ---- */
+        .hamburger { display: none; width: 36px; height: 36px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 1rem; z-index: 95; box-shadow: var(--shadow-lg); }
+        .mobile-menu.open { display: block; animation: slideDown 0.3s ease; }
+        .mobile-menu a { display: block; padding: 0.6rem 0.5rem; color: var(--text-secondary); font-weight: 500; border-bottom: 1px solid var(--border); }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: var(--text-primary); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ---- Recently Viewed ---- */
+        .recently-viewed { max-width: 1280px; margin: 0 auto; padding: 0 2rem 2rem; }
+        .recently-viewed h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+        .rv-scroll { display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .rv-card { flex: 0 0 150px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: var(--transition); text-decoration: none; }
+        .rv-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .rv-card .rv-img { height: 100px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        [data-theme='dark'] .rv-card .rv-img { background: #1a1a1a; }
+        .rv-card .rv-img img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 0.3rem; }
+        .rv-card .rv-info { padding: 0.5rem; }
+        .rv-card .rv-name { font-size: 0.72rem; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 0.2rem; }
+        .rv-card .rv-price { font-size: 0.8rem; font-weight: 800; color: var(--text-primary); }
+        .cart-badge { background: #dc2626; color: #fff; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 100px; margin-left: -0.3rem; }
+        .toast { position: fixed; top: 80px; right: 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.8rem 1.2rem; box-shadow: var(--shadow-lg); z-index: 999; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); transform: translateX(120%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left: 3px solid #16a34a; }
+        .toast.heart { border-left: 3px solid #ef4444; }
+
         /* ---- Footer ---- */
         .showcase-footer { background: var(--bg-secondary); border-top: 1px solid var(--border); padding: 2.5rem 2rem 1.5rem; }
         .footer-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem; }
@@ -161,6 +215,8 @@ if ($searchQuery || $filterCat) {
 
         @media (max-width: 768px) {
             .top-nav { padding: 0 1rem; }
+            .top-nav-links { display: none; }
+            .hamburger { display: flex; }
             .featured-section, .showcase-content, .search-results { padding: 1rem; }
             .product-grid, .featured-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
             .product-img { height: 130px; }
@@ -168,6 +224,7 @@ if ($searchQuery || $filterCat) {
             .search-bar { flex-direction: column; }
             .footer-grid { grid-template-columns: 1fr 1fr; }
             .footer-bottom { flex-direction: column; gap: 0.5rem; }
+            .recently-viewed { padding: 0 1rem 1rem; }
         }
     </style>
 </head>
@@ -181,9 +238,21 @@ if ($searchQuery || $filterCat) {
     </a>
     <div class="top-nav-links">
         <a href="showcase.php">🏠 หน้าแรก</a>
+        <a href="cart.php">🛒 ตะกร้า <span class="cart-badge" id="cartBadge">0</span></a>
         <a href="login.php">🔐 เข้าสู่ระบบ</a>
+        <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม" id="themeBtn">🌙</button>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม" id="themeBtnMobile" style="display:none">🌙</button>
+        <button class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">☰</button>
     </div>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+    <a href="showcase.php">🏠 หน้าแรก</a>
+    <a href="cart.php">🛒 ตะกร้าสินค้า</a>
+    <a href="login.php">🔐 เข้าสู่ระบบ</a>
+    <a href="#" onclick="toggleTheme();return false;" id="mobileThemeLink">🌙 Dark Mode</a>
+</div>
 
 <?php if (!$searchQuery && !$filterCat): ?>
 <!-- Banner Slideshow -->
@@ -257,6 +326,7 @@ if ($searchQuery || $filterCat) {
             <?php foreach ($searchResults as $p): ?>
                 <?php $icon = $categoryIcons[$p['category_name']] ?? '📁'; ?>
                 <a href="product_detail.php?id=<?= $p['id'] ?>" class="product-card">
+                    <?= getBadge($p) ?>
                     <div class="product-img">
                         <?php if (!empty($p['image_url'])): ?><img src="<?= htmlspecialchars($p['image_url']) ?>" alt="<?= htmlspecialchars($p['name']) ?>"><?php else: ?><?= $icon ?><?php endif; ?>
                     </div>
@@ -296,6 +366,7 @@ if ($searchQuery || $filterCat) {
         <?php foreach ($bestSellers as $p): ?>
             <?php $icon = $categoryIcons[$p['category_name']] ?? '📁'; ?>
             <a href="product_detail.php?id=<?= $p['id'] ?>" class="product-card">
+                <?= getBadge($p) ?>
                 <div class="product-img">
                     <?php if (!empty($p['image_url'])): ?><img src="<?= htmlspecialchars($p['image_url']) ?>" alt="<?= htmlspecialchars($p['name']) ?>"><?php else: ?><?= $icon ?><?php endif; ?>
                 </div>
@@ -330,6 +401,7 @@ if ($searchQuery || $filterCat) {
             <div class="product-grid">
                 <?php foreach ($products as $p): ?>
                 <a href="product_detail.php?id=<?= $p['id'] ?>" class="product-card">
+                    <?= getBadge($p) ?>
                     <div class="product-img">
                         <?php if (!empty($p['image_url'])): ?><img src="<?= htmlspecialchars($p['image_url']) ?>" alt="<?= htmlspecialchars($p['name']) ?>"><?php else: ?><?= $icon ?><?php endif; ?>
                     </div>
@@ -392,8 +464,15 @@ if ($searchQuery || $filterCat) {
     </div>
 </footer>
 
-<!-- Banner Slideshow JS -->
+<!-- Recently Viewed Section -->
+<div class="recently-viewed" id="recentlyViewed" style="display:none;">
+    <h3>🕐 สินค้าที่เพิ่งดู</h3>
+    <div class="rv-scroll" id="rvScroll"></div>
+</div>
+
+<!-- Banner Slideshow JS + Dark Mode + Recently Viewed -->
 <script>
+// Banner Slideshow
 let currentSlide = 0;
 const totalSlides = 3;
 const track = document.getElementById('bannerTrack');
@@ -409,10 +488,77 @@ function slideBanner(dir) {
     currentSlide = (currentSlide + dir + totalSlides) % totalSlides;
     goToSlide(currentSlide);
 }
-
-// Auto-slide every 5 seconds
 setInterval(() => slideBanner(1), 5000);
+
+// Dark Mode Toggle
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    updateThemeIcons();
+}
+
+function updateThemeIcons() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const icon = isDark ? '☀️' : '🌙';
+    document.querySelectorAll('.theme-toggle').forEach(b => b.textContent = icon);
+    const ml = document.getElementById('mobileThemeLink');
+    if (ml) ml.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+
+// Load saved theme
+(function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    updateThemeIcons();
+})();
+
+// Hamburger Menu
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    const btn = document.getElementById('hamburgerBtn');
+    menu.classList.toggle('open');
+    btn.textContent = menu.classList.contains('open') ? '✕' : '☰';
+}
+
+// Show mobile theme button
+if (window.innerWidth <= 768) {
+    const mb = document.getElementById('themeBtnMobile');
+    if (mb) mb.style.display = 'flex';
+}
+
+// Recently Viewed (loads from localStorage)
+function loadRecentlyViewed() {
+    const rv = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    if (rv.length === 0) return;
+    const container = document.getElementById('recentlyViewed');
+    const scroll = document.getElementById('rvScroll');
+    if (!container || !scroll) return;
+    container.style.display = 'block';
+    scroll.innerHTML = rv.map(p => `
+        <a href="product_detail.php?id=${p.id}" class="rv-card">
+            <div class="rv-img">${p.img ? `<img src="${p.img}" alt="${p.name}">` : '<span style="font-size:2rem">' + (p.icon||'📁') + '</span>'}</div>
+            <div class="rv-info">
+                <div class="rv-name">${p.name}</div>
+                <div class="rv-price">฿${Number(p.price).toLocaleString('th-TH', {minimumFractionDigits:2})}</div>
+            </div>
+        </a>
+    `).join('');
+}
+loadRecentlyViewed();
+
+// Load cart count
+(async function() {
+    try {
+        const res = await fetch('cart_api.php?action=count');
+        const data = await res.json();
+        document.getElementById('cartBadge').textContent = data.count || 0;
+    } catch(e) {}
+})();
 </script>
+
+<div class="toast" id="toast"></div>
 
 </body>
 </html>
