@@ -1,9 +1,14 @@
 <?php
 session_start();
+require_once 'db.php';
 
-// ถ้า login อยู่แล้ว → redirect ไป dashboard
+// ถ้า login อยู่แล้ว → redirect
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: index.php');
+    if ($_SESSION['role'] === 'admin') {
+        header('Location: index.php');
+    } else {
+        header('Location: showcase.php');
+    }
     exit;
 }
 
@@ -13,14 +18,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
+    // Try DB first
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password_hash'])) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role'];
+
+            if ($user['role'] === 'admin') {
+                header('Location: index.php');
+            } else {
+                header('Location: showcase.php');
+            }
+            exit;
+        }
+    } catch (Exception $e) {
+        // Table might not exist yet
+    }
+
+    // Fallback: hardcoded admin
     if ($username === 'admin' && $password === '1234') {
         $_SESSION['logged_in'] = true;
         $_SESSION['username'] = $username;
+        $_SESSION['role'] = 'admin';
         header('Location: index.php');
         exit;
-    } else {
-        $error = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
     }
+
+    $error = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
 }
 ?>
 <!DOCTYPE html>
@@ -89,8 +119,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-footer {
             text-align: center;
             margin-top: 1.5rem;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
+        }
+        .login-footer a {
+            color: var(--text-primary);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -121,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-primary login-btn">เข้าสู่ระบบ</button>
         </form>
         <div class="login-footer">
-            GamePro Inventory System v1.0
+            ยังไม่มีบัญชี? <a href="register.php">สมัครสมาชิก</a>
         </div>
     </div>
 </div>

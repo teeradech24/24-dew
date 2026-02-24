@@ -151,6 +151,10 @@ $sales = $pdo->query("
                 <span class="nav-icon">💰</span>
                 <span>Sales</span>
             </a>
+            <a href="admin_contacts.php" class="nav-link">
+                <span class="nav-icon">📧</span>
+                <span>Messages</span>
+            </a>
             <div class="nav-section-title">หน้าร้าน</div>
             <a href="showcase.php" class="nav-link">
                 <span class="nav-icon">🛍️</span>
@@ -174,7 +178,10 @@ $sales = $pdo->query("
                 <h1 class="page-title">💰 Sales</h1>
                 <p class="page-subtitle">บันทึกและจัดการการขายสินค้า</p>
             </div>
-            <button class="btn btn-primary" onclick="openSaleModal()">+ สร้างรายการขาย</button>
+            <div style="display:flex;gap:0.5rem;">
+                <a href="export_csv.php?type=sales" class="btn btn-secondary">📥 Export CSV</a>
+                <button class="btn btn-primary" onclick="openSaleModal()">+ สร้างรายการขาย</button>
+            </div>
         </div>
 
         <?php if ($message): ?>

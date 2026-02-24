@@ -171,6 +171,10 @@ function renderStars($rating) {
     <div class="top-nav-links">
         <a href="showcase.php">🏠 หน้าแรก</a>
         <a href="cart.php">🛒 ตะกร้า <span class="cart-badge" id="cartBadge">0</span></a>
+        <a href="compare.php">⚖️ เทียบ</a>
+        <a href="wishlist.php">❤️ Wishlist</a>
+        <a href="orders.php">📋 คำสั่งซื้อ</a>
+        <a href="contact.php">📧 ติดต่อ</a>
         <a href="login.php">🔐 เข้าสู่ระบบ</a>
         <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม">🌙</button>
     </div>
@@ -226,6 +230,7 @@ function renderStars($rating) {
                 <button class="btn-add-cart" disabled>🛒 สินค้าหมด</button>
                 <?php endif; ?>
                 <button class="btn-wishlist" id="wishlistBtn" onclick="toggleWishlist(<?= $product['id'] ?>)" title="เพิ่มใน Wishlist">♡</button>
+                <button class="btn-wishlist" onclick="addToCompare(<?= $product['id'] ?>)" title="เทียบสินค้า" style="font-size:1rem">⚖️</button>
             </div>
 
             <div class="detail-specs">
@@ -433,6 +438,22 @@ function toggleWishlist(id) {
         btn.classList.add('active');
     }
 })();
+
+// Compare
+function addToCompare(id) {
+    let list = JSON.parse(localStorage.getItem('compare') || '[]');
+    if (list.includes(id)) {
+        showToast('⚖️ สินค้านี้อยู่ในรายการเทียบแล้ว');
+        return;
+    }
+    if (list.length >= 4) {
+        showToast('⚖️ เทียบได้สูงสุด 4 สินค้า');
+        return;
+    }
+    list.push(id);
+    localStorage.setItem('compare', JSON.stringify(list));
+    showToast('⚖️ เพิ่มในรายการเทียบแล้ว!');
+}
 </script>
 
 <div class="toast" id="toast"></div>

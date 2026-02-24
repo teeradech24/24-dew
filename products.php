@@ -123,6 +123,10 @@ $products = $pdo->query("
                 <span class="nav-icon">💰</span>
                 <span>Sales</span>
             </a>
+            <a href="admin_contacts.php" class="nav-link">
+                <span class="nav-icon">📧</span>
+                <span>Messages</span>
+            </a>
             <div class="nav-section-title">หน้าร้าน</div>
             <a href="showcase.php" class="nav-link">
                 <span class="nav-icon">🛍️</span>

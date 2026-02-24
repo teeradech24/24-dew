@@ -251,6 +251,10 @@ if ($searchQuery || $filterCat) {
     <div class="top-nav-links">
         <a href="showcase.php">🏠 หน้าแรก</a>
         <a href="cart.php">🛒 ตะกร้า <span class="cart-badge" id="cartBadge">0</span></a>
+        <a href="compare.php">⚖️ เทียบ</a>
+        <a href="wishlist.php">❤️ Wishlist</a>
+        <a href="orders.php">📋 คำสั่งซื้อ</a>
+        <a href="contact.php">📧 ติดต่อ</a>
         <a href="login.php">🔐 เข้าสู่ระบบ</a>
         <button class="theme-toggle" onclick="toggleTheme()" title="สลับธีม" id="themeBtn">🌙</button>
     </div>
@@ -262,6 +266,10 @@ if ($searchQuery || $filterCat) {
 <div class="mobile-menu" id="mobileMenu">
     <a href="showcase.php">🏠 หน้าแรก</a>
     <a href="cart.php">🛒 ตะกร้าสินค้า</a>
+    <a href="compare.php">⚖️ เทียบสินค้า</a>
+    <a href="wishlist.php">❤️ Wishlist</a>
+    <a href="orders.php">📋 คำสั่งซื้อ</a>
+    <a href="contact.php">📧 ติดต่อเรา</a>
     <a href="login.php">🔐 เข้าสู่ระบบ</a>
     <a href="#" onclick="toggleTheme();return false;" id="mobileThemeLink">🌙 Dark Mode</a>
 </div>
